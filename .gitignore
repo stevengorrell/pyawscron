@@ -142,3 +142,6 @@ cython_debug/
 
 #code
 .code/*
+
+# macOS
+.DS_Store

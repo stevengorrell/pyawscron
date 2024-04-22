@@ -117,9 +117,9 @@ https://github.com/beemhq/aws-cron-parser
     from pyawscron import AWSCron
     import datetime
     import calendar
-    
+
     def main():
-    
+
         aws_cron = AWSCron("0 5 4 * ? *")
         today = datetime.datetime.utcnow().date()
         start_date = datetime.datetime(today.year, today.month, 1, tzinfo=datetime.timezone.utc)
@@ -131,18 +131,18 @@ https://github.com/beemhq/aws-cron-parser
             if dt > end_date:
                 break
             print(dt)
-    
-    
+
+
     if __name__ == "__main__":
         main()
-    
+
 **prev**
 
     from pyawscron import AWSCron
     import datetime
-    
+
     def main():
-    
+
         aws_cron = AWSCron("0 5 4 * ? *")
         today = datetime.datetime.utcnow().date()
         start_date = datetime.datetime(today.year, today.month, 1, tzinfo=datetime.timezone.utc)
@@ -153,8 +153,8 @@ https://github.com/beemhq/aws-cron-parser
             if dt < end_date:
                 break
             print(dt)
-    
-    
+
+
     if __name__ == "__main__":
         main()
 
@@ -221,5 +221,3 @@ AWSCron.get_prev_n_schedule(10, from_dt, '0/23 * * * ? *')
  datetime.datetime(2021, 8, 7, 9, 0, tzinfo=datetime.timezone.utc),
  datetime.datetime(2021, 8, 7, 8, 46, tzinfo=datetime.timezone.utc)]
 ```
-
-
