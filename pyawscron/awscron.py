@@ -7,7 +7,7 @@ This module contains the implementation of the AWSCron class.
 """
 
 import datetime
-from typing import List
+from typing import List, Union
 
 from .occurrence import Occurrence
 
@@ -200,7 +200,7 @@ class AWSCron:
         return allows
 
     @staticmethod
-    def get_next_n_schedule(n: int, from_date: datetime.datetime, cron: str) -> List[str]:
+    def get_next_n_schedule(n: int, from_date: datetime.datetime, cron: str):
         """
         Returns a list with the n next datetime(s) that match the aws cron expression from the provided start date.
 
@@ -249,7 +249,7 @@ class AWSCron:
     @staticmethod
     def get_all_schedule_bw_dates(
         from_date: datetime.datetime, to_date: datetime.datetime, cron: str, exclude_ends: bool = False
-    ) -> List[str]:
+    ):
         """
         Get all datetimes from from_date to to_date matching the given cron expression.
         If the cron expression matches either 'from_date' and/or 'to_date',
@@ -261,22 +261,32 @@ class AWSCron:
         :param exclude_ends: bool defaulted to false to not exclude the end date
         :return: list of datetime objects
         """
-        if type(from_date) != type(to_date) and not (
-            isinstance(from_date, type(to_date)) or isinstance(to_date, type(from_date))
-        ):
+        # Validations
+        if not isinstance(from_date, type(to_date)) or not isinstance(to_date, type(from_date)):
             raise ValueError(
-                "The from_date and to_date must be same type." "  {0} != {1}".format(type(from_date), type(to_date))
+                f"The from_date and to_date must be datetime objects. {type(from_date)} != {type(to_date)}"
             )
-
-        elif not isinstance(from_date, datetime.datetime) or (from_date.tzinfo != datetime.timezone.utc):
+        elif from_date.tzinfo is not None and from_date.tzinfo.utcoffset == datetime.timezone.utcoffset:
             raise ValueError(
-                "Invalid from_date and to_date. Must be of type datetime.dateime"
-                " and have tzinfo = datetime.timezone.utc"
+                "Invalid from_date must have tzinfo set to datetime.timezone.utc"
             )
+        elif to_date.tzinfo is not None and to_date.tzinfo.utcoffset == datetime.timezone.utcoffset:
+            raise ValueError(
+                "Invalid to_date must have tzinfo set to datetime.timezone.utc"
+            )
+        elif not isinstance(from_date.tzinfo, datetime.timezone):
+            raise ValueError(
+                "Invalid from_date must have a timezone, and the timezone must be set to UTC."
+            )
+        elif not isinstance(to_date.tzinfo, datetime.timezone):
+            raise ValueError(
+                "Invalid to_date must have a timezone, and the timezone must be set to UTC."
+            )
+        # End Validations
         else:
-            schedule_list: List[str] = []
+            schedule_list: List[Union[str, datetime.datetime]] = []
             cron_iterator = AWSCron(cron)
-            start = from_date.replace(second=0, microsecond=0) - datetime.timedelta(seconds=1)
+            start: Union[datetime.datetime, None] = from_date.replace(second=0, microsecond=0) - datetime.timedelta(seconds=1)
             stop = to_date.replace(second=0, microsecond=0)
 
             while start is not None and start <= stop:
